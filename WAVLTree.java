@@ -9,14 +9,18 @@
 
 public class WAVLTree {
 
+  private WAVLNode root;
   /**
    * public boolean empty()
    *
    * returns true if and only if the tree is empty
    *
    */
+
   public boolean empty() {
-    return false; // to be replaced by student code
+    if ((root.getLeft() == null) || (root.getRight() == null))
+      return true;
+    return false;
   }
 
  /**
@@ -25,9 +29,21 @@ public class WAVLTree {
    * returns the info of an item with key k if it exists in the tree
    * otherwise, returns null
    */
-  public String search(int k)
-  {
-	return "42";  // to be replaced by student code
+  public String search(int k) {
+    if (k == root.getKey()) 
+    	return root.getValue();
+    
+    WAVLNode next;
+    
+    next = (k < root.key) ? root.getLeft() : root.getRight();
+    while (next != null) 
+    {
+    	if (k == next.getKey()) 
+    		return next.getValue();
+    	next = (k < next.getKey()) ? next.getLeft() : next.getRight();
+    };
+    
+    return null;
   }
 
   /**
@@ -39,7 +55,24 @@ public class WAVLTree {
    * returns -1 if an item with key k already exists in the tree.
    */
    public int insert(int k, String i) {
-	  return 42;	// to be replaced by student code
+	   WAVLNode newLeaf = new WAVLNode(k, i);
+	   WAVLNode next;
+	   int balCnt = 0;
+	   
+	   //Looking for the right place. If similar key has been found - return -1
+	   if (k == root.getKey()) 
+		   return -1;
+	   next = (k < root.key) ? root.getLeft() : root.getRight();
+	   while ( ( (k < next.getKey()) ? next.getLeft() : next.getRight() ) != null ) 
+	   {
+	    	if (k == next.getKey()) 
+	    		return -1;
+	    	next = (k < next.getKey()) ? next.getLeft() : next.getRight();   
+	   }
+	   
+	   //To be continued
+	   
+	   return 42;
    }
 
   /**
@@ -166,32 +199,66 @@ public class WAVLTree {
    * (It must implement IWAVLNode)
    */
   public class WAVLNode implements IWAVLNode{
-		public int getKey()
-		{
-			return 42; // to be replaced by student code
-		}
-		public String getValue()
-		{
-			return null; // to be replaced by student code
-		}
-		public IWAVLNode getLeft()
-		{
-			return null; // to be replaced by student code
-		}
-		public IWAVLNode getRight()
-		{
-			return null; // to be replaced by student code
-		}
-		// Returns True if this is a non-virtual WAVL node (i.e not a virtual leaf or a sentinal)
-		public boolean isRealNode()
-		{
-			return true; // to be replaced by student code
-		}
+	private int key;
+    private String value;
+    private WAVLNode left;								//Amit: Changed the return type to WAVLNode instead of IWAVLNode - it's not suppose to have any consequences on the above interface
+    private WAVLNode right;								//Amit: Did it because the interface doesn't have references to rank or parent
+    private WAVLNode parent;
+    private int rank;
+    
+    public WAVLNode(int key, String value, WAVLNode left, WAVLNode right, WAVLNode parent, int rank) {
+    	this.key = key;
+    	this.value = value;
+    	this.left = left;
+    	this.right = right;
+    	this.parent = parent;
+    	this.rank = rank;
+    }
+    
+    public WAVLNode(int key, String value) {
+    	this.key = key;
+    	this.value = value;
+    	this.left = null;
+    	this.right = null;
+    	this.parent = null;
+    	this.rank = 0;
+    }    
+    
+    public int getKey()
+	{
+		return key;
+	}
+	public String getValue()
+	{
+		return value;
+	}
+	public WAVLNode getLeft()
+	{
+		return left;
+	}
+	public WAVLNode getRight()
+	{
+		return right;
+	}
+	// Returns True if this is a non-virtual WAVL node (i.e not a virtual leaf or a sentinal)
+	public boolean isRealNode()
+	{
+		return true; // to be replaced by student code
+	}
 
-		public int getSubtreeSize()
-		{
-			return 42; // to be replaced by student code
-		}
+	public int getSubtreeSize()
+	{
+		return 42; // to be replaced by student code
+	}
+	
+	public int getRank()
+	{
+		return rank;
+	}
+	public WAVLNode getParent()
+	{
+		return parent;
+	}
   }
 
 }
