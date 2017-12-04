@@ -10,6 +10,7 @@
 public class WAVLTree {
 
   private WAVLNode root;
+
   /**
    * public boolean empty()
    *
@@ -69,6 +70,12 @@ public class WAVLTree {
 	    		return -1;
 	    	next = (k < next.getKey()) ? next.getLeft() : next.getRight();   
 	   }
+	   
+	   if (k < next.getKey())
+		   next.setLeft(newLeaf);
+	   else
+		   next.setRight(newLeaf);
+	   
 	   
 	   //To be continued
 	   
@@ -258,6 +265,18 @@ public class WAVLTree {
 	public WAVLNode getParent()
 	{
 		return parent;
+	}
+	public void setLeft(WAVLNode node)
+	{
+		left = node;
+	}
+	public void setRight(WAVLNode node)
+	{
+		right = node;
+	}
+	public void setParent(WAVLNode node)
+	{
+		parent = node;
 	}
   }
 
