@@ -151,6 +151,7 @@ public class WAVLTree {
   private int delete_lu(WAVLNode node){
 	  //part 1: delete the leaf, add the vir or sons as the kids
 	  WAVLNode son;
+	  WAVLNode parent;
 	  if (node.rank == 1){
 		  if (node.getRight().isRealNode()){
 			  son = node.getRight(); 
@@ -166,9 +167,61 @@ public class WAVLTree {
 	  }else{
 		  node.parent.setLeft(son);
 	  }
-	  node.parent = null;
-	  int blnct= 0;
-	  
+	  parent = node.getParent();
+	  node.setParent(null);
+	  return reartree(parent, 0);
+  }
+  private int reartree(WAVLNode parent, int blnct){
+	  if (rank_d(parent, parent.getLeft()) >2){  
+		  ///the left is the wrong one !! the one we deleted
+		 if(rank_d(parent, parent.getRight())== 2){
+			 demote(parent, blnct);
+		 }else{
+			 WAVLNode node = parent.getRight();
+			 if((rank_d(node, node.getLeft()) ==  2) && (rank_d(node, node.getRight()) ==  2)){
+				 DoubleDemote(parent, blnct);
+			 }else if((rank_d(node, node.getRight()) ==  1)){
+				 Rotate(parent, blnct);
+			 }else{
+				 DoubleRoate(parent, blnct);
+			 }
+		 }
+		 blnct = blnct +1;
+	  }else if(rank_d(parent, parent.getRight()) > 2){
+		 ///the left is the wrong one !! the one we deleted
+			if(rank_d(parent, parent.getLeft())== 2){
+				demote(parent, blnct);
+			}else{
+				WAVLNode node = parent.getLeft();
+				if((rank_d(node, node.getRight()) ==  2) && (rank_d(node, node.getLeft()) ==  2)){
+					DoubleDemote(parent, blnct);
+					blnct = blnct +1;
+				}else if((rank_d(node, node.getLeft()) ==  1)){
+					Rotate(parent, blnct);
+				}else{
+					DoubleRoate(parent, blnct);
+				}
+			}
+		blnct = blnct+1;
+	  }
+	  return blnct;
+  }
+  private void demote(WAVLNode node, int blnct){
+	  node.setRank(node.getRank()-1);
+	  reartree(node.parent, blnct);
+  }
+  private void DoubleDemote(WAVLNode node, int blnct){
+	  if (node.getLeft().getRank() == node.getRank()-1){
+		  node.getLeft().setRank(node.getLeft().getRank()-1);
+	  }else{
+		  node.getRight().setRank(node.getRight().getRank()-1);
+	  }
+	  node.setRank(node.getRank()-1);
+	  reartree(node.getParent(), blnct);
+  }
+  
+  private int rank_d(WAVLNode highn, WAVLNode lown){
+	  return highn.getRank()-lown.getRank();
   }
   
   private void lazy_swap(WAVLNode one, WAVLNode two){
