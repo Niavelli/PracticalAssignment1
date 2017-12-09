@@ -133,7 +133,7 @@ public class WAVLTree {
 	  if (node == null){
 		  return -1;
 	  }
-	  if (node.getRank() != 0){
+	  if (node.getRight().isRealNode() && node.getLeft().isRealNode()){ 
 		  if (node.left.isRealNode()){    //ayala: can do it also smart - change it according to biggest size - size takes n
 			  WAVLNode pre = predecessor(node);
 			  lazy_swap(pre, node);
@@ -144,9 +144,33 @@ public class WAVLTree {
 			  node = suc;
 		  }
 	  }
-	  return delete_leaf(node);
+	  return delete_lu(node);
 	  
   }
+  
+  private int delete_lu(WAVLNode node){
+	  //part 1: delete the leaf, add the vir or sons as the kids
+	  WAVLNode son;
+	  if (node.rank == 1){
+		  if (node.getRight().isRealNode()){
+			  son = node.getRight(); 
+		  }else{
+			  son = node.getLeft();
+		  }
+		  son.setParent(node.getParent());
+	  }else{
+		  son = VirNode;
+	  }
+	  if ((node.parent).getRight()==node){
+		  node.parent.setRight(son);
+	  }else{
+		  node.parent.setLeft(son);
+	  }
+	  node.parent = null;
+	  int blnct= 0;
+	  
+  }
+  
   private void lazy_swap(WAVLNode one, WAVLNode two){
 	  int key = one.getKey();
 	  String value = one.getValue();
@@ -190,10 +214,42 @@ public class WAVLTree {
   }
   
   private WAVLNode successor(WAVLNode node){
-	  return 42;
+	  if (node.right.isRealNode()){
+		  node = node.right;
+		  while (node.left.isRealNode()){
+			  node = node.left;
+		  }
+		  return node;
+	  }
+	  if (node.parent.left== node){
+		  return node.parent;
+	  }
+	  while (node != root || (node.parent).left != node){
+		node = node.parent.left;
+		if (node.parent.getLeft() == node){
+			return node.getParent();
+		}
+	  }
+	  return null; 
   }
   private WAVLNode predecessor(WAVLNode node){
-	  return 3;
+	  if ((node.getLeft()).isRealNode()){
+		  node = node.left;
+		  while (node.right.isRealNode()){
+			  node = node.right;
+		  }
+		  return node;
+	  }
+	  if (node.parent.right== node){
+		  return node.parent;
+	  }
+	  while (node != root || (node.parent).getRight() != node){
+		node = node.parent.getRight();
+		if (node.parent.getRight() == node){
+			return node.getParent();
+		}
+	  }
+	  return null; 
   }
 
   /**
@@ -273,7 +329,7 @@ public class WAVLTree {
    */
   public int size()
   {
-	   return root.size(); 
+	   return root.getSubtreeSize(); 
   }
   
     /**
@@ -308,7 +364,7 @@ public class WAVLTree {
   }
   
   private String select_rec(WAVLNode node, int i){
-	  int subsize = node.getLeft().size();
+	  int subsize = node.getLeft().getSubtreeSize();
 	  if (subsize == i){
 		  return node.getValue();
 	  }else if(i<subsize){
@@ -389,7 +445,10 @@ public class WAVLTree {
 
 	public int getSubtreeSize()
 	{
-		return 42; // to be replaced by student code
+		if (isRealNode()){
+			return 1+ this.right.getSubtreeSize() + this.left.getSubtreeSize();
+		}
+		return 0;
 	}
 	
 	public int getRank()
@@ -415,12 +474,6 @@ public class WAVLTree {
 	public void setRank(int r){
 		rank = r;
 	}
-	public int size(){
-		if (isRealNode()){
-			return 1+ this.right.size() + this.left.size();
-		}
-		return 0;
-		}
 	
 	//ayala: in prder to do lazy swapping
 	public void setValue(String Value){
