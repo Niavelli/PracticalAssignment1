@@ -1,0 +1,132 @@
+n- number of nodes inn he tree
+The class being created is WAVL tree class thats create a WAVL tree and with one 
+variable = root, mention the root (WAVLnode) of the tree, and is a pointer to it.
+
+min - a function that returns the min in the tree as a string of the value of the min node key in the tree.
+if the tree is empty returns null.
+the function first check if the tree is empty and then calls min_rec, 
+a function that gets a node to start of from and searches the min rec (the most left leaf)
+get wavlnode returns a string same as the min func. 
+the function check if thers a left son and if so, it calls herself with this son till
+there is no more left son and then it would return the nodes value, same as every other call
+for the function, and the min func would return that either.
+complexity: complexity min = complexity min_rec 
+O(logn) - because except from the constant, in each call for the recursive func 
+we do O(1), it reapets same as the height of wavl tree - logn
+ 
+max - a function that returns the max in the tree as a string of the value of the max node key in the tree.
+if the tree is empty returns null.
+the function first checks if the tree is empty and then calls max_rec, 
+a function that gets a node to start of from and searches the max recursivally (the most right leaf)
+get wavlnode returns a string same as the max func. 
+the function checks if thers a right son and if so, it calls itself with this son as parameter till
+there is no more right sons and then it would return the current nodes value, every other call
+for the function would return the same, and the min func would return that either.
+complexity: complexity min = complexity min_rec 
+O(logn) - because except from the constant, in each call for the recursive func 
+we do O(1), it reapets same as the height of wavl tree - logn.
+
+size - gets nothing compute the number (int) of nodes in the tree = 
+the size of the root sub tree. 
+calls the function of WAVLNode getSubtreeSize of the root wavlnode.
+*getSubtreeSize - gets nothing returns the number of nodes in the sub tree of the 
+node where it calls. does it recursively, by checking if the node is real 
+if its not a real node - returns 0  nodes in the tree.
+otherwise calls the function again on the left and right sons and adds 1 for the node itself
+according to size definition defined in class. returns the number in the suntree
+- the function rrturns the result of the getsubtreesize function 
+complexity: 
+complexity size = complexity root.subtreesize()(subtreesize - n is the num of nodes in subtree) 
+in subtreesize every call of the function is O(1) since there are only equation and if once in it
+the function is called O(n) for each node in the tree. 
+the complexity is O(n)
+
+select - gets one parameter, int i 
+computes what is the i-est key node in the tree and returns its value as a string.
+first the function checks there is an i-est node in the tree (that 0<i<=n)
+in order to compute n - calls size *up here|
+if its not according to plan, returns null
+otherwise returns the value of select_rec with the current wavlnode - root, and int i-1
+*select_rec - gets a wavl node and int i
+returns the value of the i-est node in the subtree of the node.
+in each call first computes the size of the subtree of the nodes left son using getsubtreesize (as explained up, 
+call it once), this int gets in the varible subsize
+then if i is equal the size returns the nodes value, 
+if the size is bigger than i then call the function again this time with the
+left son of the node (because there are the smaller sizes)
+if its bigger then calls the function again with the right son (the bigger sizes)
+and this time with us looking for the i-subsize-1 of the tree 
+(since we checked those allready in the size check)
+complexity:complexity select_rec = complexity select
+before the recursive function: O(n) - the size of the tree
+the recursive function: each call is O(n in the tree) - 
+n, n/2, n/4, n/8.... 1 summing it = O(n) 
+
+delete: gets key integer k, finds key k in the tree and delets it,
+afterwords does rebalancing, returns int number of rebalacing opreations
+first creates wavlnode node - that is the search result for the search of the node
+*search node - the same as search, returns a node instead of its value.
+same as been explain about search - complexity: O(logn)
+ - afterwards check if its in the tree if not returns null
+if its not a leaf, find the predecessor/sucssesor, and change their places with lazy_swap
+*succsesor - finds the nodes sucssesor - gets a wavlnode, finds it sucssesor and returns 
+wavlnode, sucsessor - the next one in how big the keys are
+rlevant: if the key has right node, then goes to the right node and then as left son 
+as possible, returns the leftes son of the right son of the node - using while
+irelevant: if the node dosenrt have right child, goes up till the node is left  son - then 
+returns the parent, using  while
+if theres no sucssesor returns null
+complexity: O(logn) - worst case from the root to a leaf, the h  of the tree - logn
+*predecessor - finds the nodes predecessor - gets a wavlnode, finds it predecessor and returns 
+wavlnode, predecessor - the next one in how small the keys are
+rlevant: if the key has left node, then goes to the left node and then as right son 
+as possible, returns the rightest son of the left son of the node - using while
+irelevant: if the node dosent have left child, goes up till the node is a right son - then 
+returns the parent, using  while
+if theres no predecessor returns null
+complexity: O(logn) - worst case from the root to a leaf, the h  of the tree - logn
+*lazy_swap - gets two wavlnode and change their value and keys, using a vareble int key
+and string value, keeps the key and value of the one switching. 
+- after it returns from swap, in order to put the pointers right, change the pointers 
+the sucssesor/predesecor to be the node itself, because we juat changed the info
+and call delete_lu - delete leaf/unaric node
+complexity: O(1) - only constant number of actions were made
+*delete_lu - gets a wavlnode: node - unaric node or leaf, returns the number of rebalancing  
+operations  - int, creates two varebles: son and parent - if theres a son to the node,
+the node is unaric, we replace the sons parents to be the parent of the node
+if theres no son we set it to be a virtual node
+afterwards we change the parents son to be the son and not the node.
+we update the nodes parent  to be null so it wouldnt think he is in the tree
+returns the func reartree - re arange tree, rebalance the tree so it would stay a wavl tree
+*reartree - gets two parametrs, the num of balancing nedded at this point - int, 
+blnct - blance counter. and parent - WAVLNode the parent of the one deleted. 
+checks all kind of situations as was tought in class. for each situation calls the 
+right func to take care of it
+the rank diffrence, cauculated with rank_d
+(*rank_d gets two wavlnodes and cauculate the rank diffrence using node.getrank, 
+returns int of the rank diffrence. complexity: O(1) - just equation)
+if the rank diffrence is between parent and the one that wasnt deleted is 2 - demote
+(*demote - changes the ranks properlly. calls the function reartree, with the parent of the node
+that got in to check it was a terminal delete and the blnct +1 - one was made, complexity; O(1), without the recalling the function
+would put that in my considerations to the final complexity, otherwise the complexity is the 
+complexity of rearatree with this node and blnct)
+if the rank_d is 1:
+if the nodes kids are in position 2,2 - double demote
+(*double demote - gets wavlnode, chenges the ranks of the node, and its son, calls 
+the function delete_lu to check is terminal, add 2 to blnct complexity; O(1), without the recalling the function
+would put that in my considerations to the final complexity, otherwise the complexity is the 
+complexity of rearatree with this node and blnct)
+if the nodes kids are 1/2,1 then calls rotate - explained in insert
+if the kids are rank_d 1,2 calls double-rotate - explained in insert 
+if theres no problem in rank_d returns blnct - int (that the stopping of the recurtion)
+complexity: does O(1) in each call, reapeting the call O(logn) as the height - not terminal
+demote for example. - but there are two times of rotations at most (?), and so two more logn at max
+which means O(logn)
+ - return to delete_lu - returns the result of it 
+complexity: excapt from that did only O(1) with that O(logn)
+- returns to delete, which uses only functions of O(logn) times O(1) 
+plus this the complexity is O(logn)
+
+WAVLNode;
+functions of constructor. or get the vareble.
+except:
