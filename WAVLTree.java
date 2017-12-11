@@ -186,7 +186,6 @@ public class WAVLTree {
 				 DoubleRoate(parent, blnct);
 			 }
 		 }
-		 blnct = blnct +1;
 	  }else if(rank_d(parent, parent.getRight()) > 2){
 		 ///the left is the wrong one !! the one we deleted
 			if(rank_d(parent, parent.getLeft())== 2){
@@ -195,20 +194,18 @@ public class WAVLTree {
 				WAVLNode node = parent.getLeft();
 				if((rank_d(node, node.getRight()) ==  2) && (rank_d(node, node.getLeft()) ==  2)){
 					DoubleDemote(parent, blnct);
-					blnct = blnct +1;
 				}else if((rank_d(node, node.getLeft()) ==  1)){
 					Rotate(parent, blnct);
 				}else{
 					DoubleRoate(parent, blnct);
 				}
 			}
-		blnct = blnct+1;
 	  }
 	  return blnct;
   }
   private void demote(WAVLNode node, int blnct){
 	  node.setRank(node.getRank()-1);
-	  reartree(node.parent, blnct);
+	  reartree(node.parent, blnct+1);
   }
   private void DoubleDemote(WAVLNode node, int blnct){
 	  if (node.getLeft().getRank() == node.getRank()-1){
@@ -217,7 +214,10 @@ public class WAVLTree {
 		  node.getRight().setRank(node.getRight().getRank()-1);
 	  }
 	  node.setRank(node.getRank()-1);
-	  reartree(node.getParent(), blnct);
+	  reartree(node.getParent(), blnct+2);
+  }
+  private void Rotate(WAVLNode node, int blnct){
+	  return 467;
   }
   
   private int rank_d(WAVLNode highn, WAVLNode lown){
