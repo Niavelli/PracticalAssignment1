@@ -136,7 +136,7 @@ public class WAVLTree {
 			  WAVLNode pre = predecessor(node);//amit: I didn't understand what you meant above. Also - there is no difference with deleting with the predecessor or the successor - right?
 			  lazySwap(pre, node);
 			  node = pre;
-		  }else{								//amit: this else is unnecessary. At this point - node.getLeft().isRealNode() always true
+		  }else{								//amit: this else is unnecessary. At this point - node.getLeft().isRealNode() always true //ayala: else is good or else it would swap pre and suc
 			  WAVLNode suc = successor(node);
 			  lazySwap(suc, node);
 			  node = suc;
@@ -254,7 +254,7 @@ public class WAVLTree {
 	  	else
 	  		rotateLeft(node);
 	  
-	  	//We need to correct node ranking anyway
+	  	//We need to correct node ranking anyway //ayala: what if it is non terminal demote?
 	  	node.setRank(node.getRank()-1);
 	  	blnct += 2;												// 1 for the rotation and 1 for the "demotion"
 	  	
@@ -325,7 +325,7 @@ public class WAVLTree {
 	  }
 	  else
 	  {
-		  node.getParent().setRight(node.getLeft());
+		  node.getParent().setRight(node.getLeft()); 
 	  }
 	  node.getLeft().setParent(node.getParent());
 	  
@@ -360,7 +360,7 @@ public class WAVLTree {
   private int rankDiff(WAVLNode highn, WAVLNode lown){
 	  return highn.getRank()-lown.getRank();
   }
-  
+  //ayala: why better?  the only pointers important are the ones parent and child and in lazy we change it
   private void lazySwap(WAVLNode one, WAVLNode two){				// amit: Better not to do it lazy - if there are any pointers to the leaf not being deleted - we are going to delete them after the swap
 	  WAVLNode oneParent = one.getParent();
 	  WAVLNode oneLeft = one.getLeft();
@@ -390,40 +390,6 @@ public class WAVLTree {
 		  twoParent.setRight(two);
 	  if (oneLeft.isRealNode()) oneLeft.setParent(two);
 	  if (oneRight.isRealNode()) oneRight.setParent(two);
-	  
-  }
-  
-  private void swapPlaces(WAVLNode leaf, WAVLNode node){			//amit: this is not being used - maybe delete it?
-	  //step 1: setting kids
-	  leaf.setRight(node.right);
-	  leaf.setLeft(node.left);
-	  node.setLeft(this.VirNode);
-	  node.setRight(this.VirNode);
-	  //step 2: setting kids parents
-	  if (leaf.right.isRealNode()){
-		  leaf.right.setParent(leaf);
-	  }
-	  if (leaf.getLeft().isRealNode()){
-		  leaf.left.setParent(leaf);
-	  }//set parent for vr or iwavlnode but then wont work
-	  //step3: setting the rank
-	  leaf.setRank(node.rank);
-	  node.setRank(0);
-	  //step 4: set the parets kids
-	  WAVLNode parent = node.parent;
-	  if ((node.parent).getRight()==node){
-		  node.parent.setRight(leaf);
-	  }else{
-		  node.parent.setLeft(leaf);
-	  }
-	  if ((leaf.parent.right == leaf)){
-		  leaf.parent.setRight(node);
-	  }else{
-		  leaf.parent.setLeft(node);
-	  }
-	  //step 5: set the nodes parents
-	  node.setParent(leaf.parent);
-	  leaf.setParent(node.parent);
 	  
   }
   
