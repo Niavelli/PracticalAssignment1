@@ -1,3 +1,6 @@
+import java.util.ArrayList;
+import java.util.List;
+
 /**
 *
 * WAVLTree
@@ -15,7 +18,7 @@ public class WAVLTree {
  //ayala: what is the righ t one?
  //amit:  from slide 5 in WAVL presentation says you were right and it should be represented by a single entity for all external leaves
  
- public void setVN() {
+ private void setVN() {
 	 this.VirNode = new WAVLNode(0, null, null, null, null, -1);
  }
  
@@ -24,21 +27,25 @@ public class WAVLTree {
 	 this.root = this.VirNode;
  }
  
- public void setroot(WAVLNode root){
+ private void setroot(WAVLNode root){
 	 this.root = root;
  }
  ///two options
  
- public WAVLNode getVN() {
+ private WAVLNode getVN() {
 	 return VirNode;
  }
+ 
+ private boolean isRoot(WAVLNode node) {
+	 return getRoot()==node;
+ }
+ 
  /**
   * public boolean empty()
   *
   * returns true if and only if the tree is empty
   *
   */
-
  public boolean empty() {
    if ((!root.getLeft().isRealNode()) || (!root.getRight().isRealNode()))
      return true;
@@ -97,23 +104,39 @@ public class WAVLTree {
   public int insert(int k, String i) {
 	   WAVLNode newLeaf;
 	   WAVLNode next;
+	   WAVLNode father;
 	   //Looking for the right place. If similar key has been found - return -1
-	   if (k == root.getKey())			 
-		   return -1;
-	   next = (k < root.key) ? root.getLeft() : root.getRight();
-	   while ( next.isRealNode() ) 
+	   if (!root.isRealNode())
 	   {
-	    	if (k == next.getKey()) 
-	    		return -1;
-	    	next = (k < next.getKey()) ? next.getLeft() : next.getRight();   
+		   root = new WAVLNode(k, i);
+		   return 0;
 	   }
-	   next = next.getParent();///////////This Is Not True!!////////////////////////We stopped the while when next is virtual leaf
-	   newLeaf = new WAVLNode(k, i, VirNode, VirNode, next, 0);
-	   if (k < next.getKey())
-		   next.setLeft(newLeaf);
 	   else
-		   next.setRight(newLeaf);
-	   return rearTree(next, 0);												// Return the balance operations number
+	   {
+		   if (k == root.getKey())			 
+			   return -1;
+		   next = (k < root.key) ? root.getLeft() : root.getRight();
+		   father = root;
+		   while ( next.isRealNode() ) 
+		   {
+		    	if (k == next.getKey()) 
+		    		return -1;
+		    	father = next;
+		    	next = (k < next.getKey()) ? next.getLeft() : next.getRight();   
+		   }															//We stopped the while when next is virtual leaf
+		   newLeaf = new WAVLNode(k, i, VirNode, VirNode, father, 0);
+		   if (k < father.getKey())
+		   {
+			   father.setLeft(newLeaf);
+			   //return rearTree(father.getLeft(), 0);
+		   }
+		   else
+		   {
+			   father.setRight(newLeaf);
+			   //return rearTree(father.getRight(), 0);
+		   }
+	   }
+	   return rearTree(father, 0);
   }
 
  /**
@@ -228,12 +251,14 @@ public class WAVLTree {
   
   private void demote(WAVLNode node, int blnct){
 	  node.setRank(node.getRank()-1);
-	  rearTree(node.parent, blnct+1);
+	  if (node.parent != null)
+		  rearTree(node.parent, blnct+1);
   }
   
   private void promote(WAVLNode node, int blnct){
 	  node.setRank(node.getRank()+1);
-	  rearTree(node.parent, blnct+1);
+	  if (node.parent != null)
+		  rearTree(node.parent, blnct+1);
   }
   
   private void DoubleDemote(WAVLNode node, int blnct){
@@ -319,42 +344,56 @@ public class WAVLTree {
   
   private void rotateRight(WAVLNode node)
   {
-	  if (node.getParent().getKey() > node.getKey())			//node is left child
+	  if (node.getParent() != null)
 	  {
-		  node.getParent().setLeft(node.getLeft());
-	  }
-	  else
-	  {
-		  node.getParent().setRight(node.getLeft());
+		  if (node.getParent().getKey() > node.getKey())			//node is left child
+		  {
+			  node.getParent().setLeft(node.getLeft());
+		  }
+		  else
+		  {
+			  node.getParent().setRight(node.getLeft());
+		  }
 	  }
 	  node.getLeft().setParent(node.getParent());
 	  
 	  node.setParent(node.getLeft());
 	  
 	  node.setLeft(node.getLeft().getRight());
-	  node.getLeft().setParent(node);
+	  if (node.getLeft().isRealNode())
+		  node.getLeft().setParent(node);
 	  
 	  node.getParent().setRight(node);
+	  
+	  if (isRoot(node))
+		  setroot(node.getParent());
   }
   
   private void rotateLeft(WAVLNode node)
   {
-	  if (node.getParent().getKey() > node.getKey())			//node is left child
+	  if (node.getParent() != null)
 	  {
-		  node.getParent().setLeft(node.getRight());
-	  }
-	  else
-	  {
-		  node.getParent().setRight(node.getRight());
+		  if (node.getParent().getKey() > node.getKey())			//node is left child
+		  {
+			  node.getParent().setLeft(node.getRight());
+		  }
+		  else
+		  {
+			  node.getParent().setRight(node.getRight());
+		  }
 	  }
 	  node.getRight().setParent(node.getParent());
 	  
 	  node.setParent(node.getRight());
 	  
 	  node.setRight(node.getRight().getLeft());
-	  node.getRight().setParent(node);
+	  if (node.getRight().isRealNode())
+		  node.getRight().setParent(node);
 	  
 	  node.getParent().setLeft(node);
+	  
+	  if (isRoot(node))
+		  setroot(node.getParent());
   }
   
   private int rankDiff(WAVLNode highn, WAVLNode lown){
@@ -446,6 +485,7 @@ public class WAVLTree {
 	  }
 	  return null; 
   }
+  
   private WAVLNode predecessor(WAVLNode node){
 	  if ((node.getLeft()).isRealNode()){
 		  node = node.left;
@@ -517,13 +557,18 @@ public class WAVLTree {
   */
  public int[] keysToArray()
  {
-	 int [] = int[]
-	 if (!root.isRealNode())
-		 return 
-	 WAVLTree T = new WAVLTree();
-	 T.setroot(root.getRight());
-	 int[] arr = new int[42]; // to be replaced by student code
-       return arr;              // to be replaced by student code
+	 	List<Integer> lst = keysToArrayRec(root);
+	 	return lst.stream().mapToInt(Integer::intValue).toArray();
+ }
+ 
+ private List<Integer> keysToArrayRec(WAVLNode subTree) {
+	 	List<Integer> returnArray = new ArrayList<Integer>();
+ 		if (subTree.getLeft().isRealNode())
+ 			returnArray.addAll(keysToArrayRec(subTree.getLeft()));
+ 		returnArray.add(subTree.getKey());
+ 		if (subTree.getRight().isRealNode())
+ 			returnArray.addAll(keysToArrayRec(subTree.getRight()));
+	 	return returnArray;
  }
 
  /**
@@ -535,8 +580,12 @@ public class WAVLTree {
   */
  public String[] infoToArray()
  {
-       String[] arr = new String[42]; // to be replaced by student code
-       return arr;                    // to be replaced by student code
+       
+	 	int[] keysArray = keysToArray();	 		
+	 	String[] arr = new String[keysArray.length];
+	 	for (int i = 0; i < keysArray.length; ++i)
+	 		arr[i] = search(keysArray[i]);
+	 	return arr;                    // to be replaced by student code
  }
 
   /**
