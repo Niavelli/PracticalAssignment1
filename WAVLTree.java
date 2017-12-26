@@ -10,17 +10,11 @@ import java.util.List;
 *
 */
 
+
 public class WAVLTree {
 
  private WAVLNode root;
  public WAVLNode VirNode;
- 
- //ayala: what is the righ t one?
- //amit:  from slide 5 in WAVL presentation says you were right and it should be represented by a single entity for all external leaves
- 
- private void setVN() {
-	 this.VirNode = new WAVLNode(0, null, null, null, null, -1);
- }
  
  public WAVLTree(){
 	 this.VirNode = new WAVLNode(0, null, null, null, null, -1);
@@ -30,7 +24,6 @@ public class WAVLTree {
  private void setroot(WAVLNode root){
 	 this.root = root;
  }
- ///two options
  
  private WAVLNode getVN() {
 	 return VirNode;
@@ -40,6 +33,10 @@ public class WAVLTree {
 	 return getRoot()==node;
  }
  
+ private WAVLNode getRoot() {
+	return this.root;
+ }
+	
  /**
   * public boolean empty()
   *
@@ -108,7 +105,7 @@ public class WAVLTree {
 	   //Looking for the right place. If similar key has been found - return -1
 	   if (!root.isRealNode())
 	   {
-		   root = new WAVLNode(k, i);
+		   root = new WAVLNode(k, i, VirNode, VirNode, null, 0);
 		   return 0;
 	   }
 	   else
@@ -150,21 +147,22 @@ public class WAVLTree {
   
   public int delete(int k)
   {
+	  //check basic cases, find node
 	  WAVLNode node = searchNode(k);
 	  if (node == null){
 		  return -1;
 	  }
+	  //check whetere the node has children and if not leaf or uno dwap him to be so
 	  if (node.getRight().isRealNode() && node.getLeft().isRealNode()){
-		  if (node.getLeft().isRealNode()){    //ayala: can do it also smart - change it according to biggest size - size takes n
-			  WAVLNode pre = predecessor(node);//amit: I didn't understand what you meant above. Also - there is no difference with deleting with the predecessor or the successor - right?
-			  lazySwap(pre, node);
-			  node = pre;
-		  }else{								//amit: this else is unnecessary. At this point - node.getLeft().isRealNode() always true
+		  if (node.getLeft().isRealNode()){  
+			  WAVLNode pre = predecessor(node);
+			  Swap(pre, node);
+		  }else{								
 			  WAVLNode suc = successor(node);
-			  lazySwap(suc, node);
-			  node = suc;
+			  Swap(suc, node);
 		  }
 	  }
+	  //delete the leaf/uno
 	  return delete_lu(node);
 	  
   }
@@ -173,15 +171,23 @@ public class WAVLTree {
 	  //part 1: delete the leaf, add the vir or sons as the kids
 	  WAVLNode son;
 	  WAVLNode parent;
+	  //set the nodes  pointers corectly
 	  if (node.getRank() == 1){
 		  if (node.getRight().isRealNode()){
 			  son = node.getRight(); 
 		  }else{
 			  son = node.getLeft();
 		  }
+		  //check base cases if no parents are in
+		  if (isRoot(node)){
+			  root = son;
+		  }
 		  son.setParent(node.getParent());
 	  }else{
 		  son = VirNode;
+		  if (isRoot(node)){
+			  root = son;
+		  }
 	  }
 	  if ((node.parent).getRight()==node){
 		  node.parent.setRight(son);
@@ -190,6 +196,7 @@ public class WAVLTree {
 	  }
 	  parent = node.getParent();
 	  node.setParent(null);
+	  //calls the function that supouse to re arrange the tree, correctly
 	  return rearTree(parent, 0);
   }
   
@@ -218,7 +225,8 @@ public class WAVLTree {
 	  
 	  // Deletion Part //
 	  if (rankDiff(parent, parent.getLeft()) >2){  
-		  ///the left is the wrong one !! the one we deleted
+		  ///we deleted left
+		  //check cases to whom should call
 		 if(rankDiff(parent, parent.getRight())== 2){
 			 demote(parent, blnct);
 		 }else{
@@ -232,7 +240,7 @@ public class WAVLTree {
 			 }
 		 }
 	  }else if(rankDiff(parent, parent.getRight()) > 2){
-		 ///the right is the wrong one !! the one we deleted
+		 ///we deleted right
 			if(rankDiff(parent, parent.getLeft())== 2){
 				demote(parent, blnct);
 			}else{
@@ -249,39 +257,50 @@ public class WAVLTree {
 	  return blnct;
   }
   
-  private void demote(WAVLNode node, int blnct){
+  private int demote(WAVLNode node, int blnct){
+	  //does demote calls the fuction again till there is nothinng to change
 	  node.setRank(node.getRank()-1);
-	  if (node.parent != null)
-		  rearTree(node.parent, blnct+1);
+	  if (isRoot(node))
+		  return blnct+1;
+	  return rearTree(node.parent, blnct+1);
   }
   
-  private void promote(WAVLNode node, int blnct){
+  private int promote(WAVLNode node, int blnct){
 	  node.setRank(node.getRank()+1);
-	  if (node.parent != null)
-		  rearTree(node.parent, blnct+1);
+	  if (isRoot(node))
+		  return blnct+1;
+	  return rearTree(node.parent, blnct+1);
   }
   
-  private void DoubleDemote(WAVLNode node, int blnct){
+  private int DoubleDemote(WAVLNode node, int blnct){
+	  //demote twice 
 	  if (node.getLeft().getRank() == node.getRank()-1){
 		  node.getLeft().setRank(node.getLeft().getRank()-1);
 	  }else{
 		  node.getRight().setRank(node.getRight().getRank()-1);
 	  }
 	  node.setRank(node.getRank()-1);
-	  rearTree(node.getParent(), blnct+2);
+	  if (isRoot(node))
+		  return blnct+2;
+	  return rearTree(node.getParent(), blnct+2);
   }
   
   private void Rotate(WAVLNode node, int blnct){
 	  	int rankDiffLeft = rankDiff(node, node.getLeft());
+//	  	int rankDiffForAorBRotationType = -1;							//amit: There are two types of Single Rotation after deletion
+//	  	if (rankDiffLeft == 3)
+//	  		rankDiffForAorBRotationType = rankDiff(node.getRight(),node.getRight().getLeft());
+//	  	else if (rankDiffLeft == 1) 
+//	  		rankDiffForAorBRotationType = rankDiff(node.getLeft(),node.getLeft().getRight());
 	  
 	  	if (rankDiffLeft == 0 || rankDiffLeft == 1)
 	  		rotateRight(node);
 	  	else
 	  		rotateLeft(node);
-	  
+	  	
 	  	//We need to correct node ranking anyway
 	  	node.setRank(node.getRank()-1);
-	  	blnct += 2;												// 1 for the rotation and 1 for the "demotion"
+	  	blnct += 1;
 	  	
 	  	//This is needed only after deletion
 	  	if (rankDiffLeft == 3 || rankDiffLeft == 1)
@@ -305,6 +324,7 @@ public class WAVLTree {
 	  		node.setRank(node.getRank()-1);
 	  		node.getParent().setRank(node.getParent().getRank()+1);
 	  		node.getParent().getLeft().setRank(node.getParent().getLeft().getRank()-1);
+	  		break;
 	  	}
 	  	
 	  	case 2:
@@ -315,6 +335,7 @@ public class WAVLTree {
 	  		node.setRank(node.getRank()-1);
 	  		node.getParent().setRank(node.getParent().getRank()+1);
 	  		node.getParent().getRight().setRank(node.getParent().getRight().getRank()-1);
+	  		break;
 	  	}
 	  	
 	  	case 1:
@@ -325,6 +346,7 @@ public class WAVLTree {
 	  		node.setRank(node.getRank() - 2);
 	  		node.getParent().setRank(node.getParent().getRank() + 2);
 	  		node.getParent().getRight().setRank(node.getParent().getRight().getRank()-1);
+	  		break;
 	  	}
 	  	
 	  	case 3:
@@ -335,6 +357,7 @@ public class WAVLTree {
 	  		node.setRank(node.getRank() - 2);
 	  		node.getParent().setRank(node.getParent().getRank() + 2);
 	  		node.getParent().getLeft().setRank(node.getParent().getLeft().getRank()-1);
+	  		break;
 	  	}
 	  }
 
@@ -400,7 +423,8 @@ public class WAVLTree {
 	  return highn.getRank()-lown.getRank();
   }
   
-  private void lazySwap(WAVLNode one, WAVLNode two){				// amit: Better not to do it lazy - if there are any pointers to the leaf not being deleted - we are going to delete them after the swap
+  private void Swap(WAVLNode one, WAVLNode two){
+	  //one - the first node to swap, two the second
 	  WAVLNode oneParent = one.getParent();
 	  WAVLNode oneLeft = one.getLeft();
 	  WAVLNode oneRight = one.getRight();
@@ -429,40 +453,6 @@ public class WAVLTree {
 		  twoParent.setRight(two);
 	  if (oneLeft.isRealNode()) oneLeft.setParent(two);
 	  if (oneRight.isRealNode()) oneRight.setParent(two);
-	  
-  }
-  
-  private void swapPlaces(WAVLNode leaf, WAVLNode node){			//amit: this is not being used - maybe delete it?
-	  //step 1: setting kids
-	  leaf.setRight(node.right);
-	  leaf.setLeft(node.left);
-	  node.setLeft(this.VirNode);
-	  node.setRight(this.VirNode);
-	  //step 2: setting kids parents
-	  if (leaf.right.isRealNode()){
-		  leaf.right.setParent(leaf);
-	  }
-	  if (leaf.getLeft().isRealNode()){
-		  leaf.left.setParent(leaf);
-	  }//set parent for vr or iwavlnode but then wont work
-	  //step3: setting the rank
-	  leaf.setRank(node.rank);
-	  node.setRank(0);
-	  //step 4: set the parets kids
-	  WAVLNode parent = node.parent;
-	  if ((node.parent).getRight()==node){
-		  node.parent.setRight(leaf);
-	  }else{
-		  node.parent.setLeft(leaf);
-	  }
-	  if ((leaf.parent.right == leaf)){
-		  leaf.parent.setRight(node);
-	  }else{
-		  leaf.parent.setLeft(node);
-	  }
-	  //step 5: set the nodes parents
-	  node.setParent(leaf.parent);
-	  leaf.setParent(node.parent);
 	  
   }
   
@@ -514,6 +504,7 @@ public class WAVLTree {
    */
   public String min()
   {
+	  //finds min of function, base then rec
 	   if (empty()){
 		   return null;
 	   }
@@ -521,7 +512,8 @@ public class WAVLTree {
   }
 
   //Recursive Minimum
-  public String minRec(WAVLNode node){				
+  public String minRec(WAVLNode node){	
+	  //stopping condition
 	  if (node.getLeft().isRealNode()){
 		  return minRec(node.getLeft());
 	  }else{
@@ -536,6 +528,7 @@ public class WAVLTree {
    */
   public String max()
   {
+	  //same as min
 	   if (empty()){
 		   return null;
 	   }
@@ -609,10 +602,7 @@ public class WAVLTree {
    * precondition: none
    * postcondition: none
    */
-  public WAVLNode getRoot() //ayala: changed type into wavlnode because that how we defined it, can change it in return
-  {
-	   return root;
-  }
+
     /**
    * public int select(int i)
    *
@@ -633,6 +623,7 @@ public class WAVLTree {
   }
   
   private String selectRec(WAVLNode node, int i){
+	  //check subtreesize and then calls rec according to it
 	  int subsize = node.getLeft().getSubtreeSize();
 	  if (subsize == i){
 		  return node.getValue();
@@ -679,16 +670,7 @@ public class WAVLTree {
    	this.right = right;
    	this.parent = parent;
    	this.rank = rank;
-   }
-   
-   public WAVLNode(int key, String value) {
-   	this.key = key;
-   	this.value = value;
-   	this.left = getVN();    //ayala: for leaf qwe should have two virtual sons, changed
-   	this.right = getVN();   ///ayala: should check if its ok cause its in the class (knowing its in there) if not wouldnt recognise and know
-   	this.parent = null;		// amit: I don't know if it's needed - we can build this new leaf with the virtual leaf of the tree itself with the first constructor
-   	this.rank = 0;
-   }    
+   } 
    
    public int getKey()
 	{
@@ -714,6 +696,7 @@ public class WAVLTree {
 
 	public int getSubtreeSize()
 	{
+		//recursivly check the sub tree size
 		if (isRealNode()){
 			return 1+ this.right.getSubtreeSize() + this.left.getSubtreeSize();
 		}
@@ -744,7 +727,6 @@ public class WAVLTree {
 		rank = r;
 	}
 	
-	//ayala: in prder to do lazy swapping
 	public void setValue(String Value){
 		value = Value;
 	}
